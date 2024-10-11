@@ -174,7 +174,7 @@ class AircraftFormulas:
     
     ###
     
-    def sWetWing(tc, sExposed, adjustment = 0):
+    def sWetAirfoil(tc, sExposed, adjustment = 0):
         """
         Calculates the wetted area of the wing.
 
