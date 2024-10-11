@@ -98,7 +98,7 @@ print("CL for Cruise Conditions: "f"{CLcruise:.4}")
 # CD,0,fuselage calculations
 
 length = 11
-aMax = 4.32
+aMax = 3.75
 aTop = 10.77
 aSide = 9.19
 sWetFuse = 3.4 * ((aTop + aSide)/2)
@@ -124,27 +124,31 @@ print("Fuselage Drag Coefficient: "f"{cD0fuse:.2}")
 cAvgStabilizer = 1.34
 XCmStabilizer = 0.268
 tcStabilizer = .2
-sStabilizer = 4.25 
-sStabilizerTotal = sStabilizer * 3
+sHStabilizer = 4.25 
+sVStabilizer = 3.1
+sHStabilizerTotal = sHStabilizer * 2
 angleStabilizer = 0 
 qStabilizer = 1.05
 
 reStabilizer = AircraftFormulas.reynoldsNumber(rho, v, cAvgStabilizer, mu)
 
-sWetStabilizer = AircraftFormulas.sWetAirfoil(tcStabilizer, sStabilizerTotal)
+sWetHStabilizer = AircraftFormulas.sWetAirfoil(tcStabilizer, sHStabilizerTotal)
+sWetVStabilizer = AircraftFormulas.sWetAirfoil(tcStabilizer, sVStabilizer)
 cfcStabilizer = AircraftFormulas.cfcTurbulant(reStabilizer, m)
 ffStabilizer = AircraftFormulas.ffWing(XCmStabilizer, tcStabilizer, m, angleStabilizer)
 
+cD0HStabilizer = AircraftFormulas.coefficientDragComponent(cfcStabilizer, ffStabilizer, qStabilizer, sWetHStabilizer, sWing)
+cD0VStabilizer = AircraftFormulas.coefficientDragComponent(cfcStabilizer, ffStabilizer, qStabilizer, sWetVStabilizer, sWing)
 
-cD0Stabilizer = AircraftFormulas.coefficientDragComponent(cfcStabilizer, ffStabilizer, qStabilizer, sStabilizerTotal, sWing)
 
 print("Empennage Reynolds Number: "f"{reStabilizer:.2e}")
 print("Empennage Skin Friction Coefficient: "f"{cfcStabilizer:.2}")
 print("Empennage Form Factor: "f"{ffStabilizer:.3}")
-print("Total Wetted Empennage Area: "f"{sWetStabilizer:.3}"" m**2")
+print("Horizontal Stabilizer Wetted Area: "f"{sWetHStabilizer:.3}"" m**2")
+print("Vertical Stabilizer Wetted Area: "f"{sWetVStabilizer:.3}"" m**2")
 
-print("Empennage Drag Coefficient: "f"{cD0Stabilizer:.2}")
-
+print("Hortizontal Stabilizer Drag Coefficient: "f"{cD0HStabilizer:.2}")
+print("Vertical Stabilizer Drag Coefficient: "f"{cD0VStabilizer:.2}")
 
 ################
 # CD,0,landing gear calculations
@@ -171,7 +175,7 @@ print("Total Gear Drag Coefficient: "f"{totalcD0gear:.2}")
 ################
 # CD,0,total calculations
 
-cD0total = cD0wing + cD0fuse + cD0Stabilizer + totalcD0gear
+cD0total = cD0wing + cD0fuse + cD0HStabilizer + cD0VStabilizer + totalcD0gear
 
 print("Total Parasite Drag Coefficient: "f"{cD0total:.2}")
 
