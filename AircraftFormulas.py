@@ -260,7 +260,7 @@ class AircraftFormulas:
 
         Returns
         -------
-        ff : float.
+        ff : float
             Fuselage form factor.
 
         """
@@ -271,5 +271,134 @@ class AircraftFormulas:
         return ff
 
     ###
+    
+    def CLCDmax(K, cD0, path):
+        """
+        Calculates the CL/CD ratio based on specified path.
+        If path is set to 1, calculates (CL/CD)max.
+        If path is set to 2, calculates (CL(3/2)/CD)max.
+
+        Parameters
+        ----------
+        K : float
+            Induced drag coefficient K.
+        cD0 : float
+            Total parasite drag.
+        path : int
+            Function identifier explained above. Changes formula used as necessary
+
+        Returns
+        -------
+        CLCD : float
+            (CL/CD)max value.
+
+        """
+        if path == 1:
+            CLCD = math.sqrt( 1 / (4 * K * cD0) )
+        elif path == 2:
+            CLCD = 0.25 * math.pow( (3 / (K * math.pow(cD0, 1/3)) ) , 3/4)
+    
+        return CLCD
+    
+    ###
+    
+    def calcRange(nPR, C, CLCD, W0, W1):
+        """
+        Calculates the range of an aircraft.
+
+        Parameters
+        ----------
+        nPR : float
+            Prop efficiency ration.
+        C : float
+            Specific fuel consumption (1 / unit length).
+        CLCD : float
+            (CL/CD) ratio.
+        W0 : float
+            Gross takeoff weight.
+        W1 : float
+            Weight without fuel.
+
+        Returns
+        -------
+        rangeValue : float
+            Range to achieve given CL/CD ratio.
+
+        """
+        
+        rangeValue = (nPR / C) * CLCD * math.log(W0 / W1)
+        
+        return rangeValue
+    
+    ###
+    
+    def veloToAchieve(rho, W, S, K, cD0, path):
+        """
+        Calculates the velocity to acheive a cetain optimization based on path number.
+        If path is set to 1, calculates velocity for optimal range.
+        If path is set to 2, calculates velocity for optimal power.
+
+        Parameters
+        ----------
+        rho : float
+            Air density.
+        W : float
+            Aircraft weight.
+        S : float
+            Planform area of the wing.
+        K : float
+            Induced drag coefficient.
+        cD0 : float
+            Total parasite drag.
+        path : int
+            Function identifier explained above. Will change formula if necessary.
+
+        Returns
+        -------
+        v : float
+            Velocity to achieve given parameter.
+
+        """
+        
+        if path == 1:
+            v = math.sqrt( ((2 * W) / (rho * S)) * math.sqrt(K / cD0) )
+        elif path == 2:
+            v = math.sqrt( ((2 * W) / (rho * S)) * math.sqrt(K / (3 * cD0)) )
+        
+        return v
+    
+    ###
+    
+    def calcEndurance(nPR, rho, S, C, CLCD, W0, W1):
+        """
+        Calculates the endurance for a given CL/CD ratio
+
+        Parameters
+        ----------
+        nPR : float
+            Prop efficiency ratio.
+        rho : float
+            Air density.
+        S : float
+            Wing planform area.
+        C : float
+            Specific fuel consumption (1 / unit length).
+        CLCD : float
+            CL/CD ratio.
+        W0 : float
+            Gross takeoff weight.
+        W1 : TYPE
+            No fuel weight.
+
+        Returns
+        -------
+        Endurance : float
+            Endurance of an aircraft for given CL/CD ratio.
+
+        """
+        
+        Endurance = ((nPR * math.sqrt(2 * rho * S)) / C) * CLCD * ( (1/math.sqrt(W1)) - (1/math.sqrt(W0)) )
+    
+        return Endurance
     
 
