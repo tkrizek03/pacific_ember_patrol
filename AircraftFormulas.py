@@ -401,4 +401,23 @@ class AircraftFormulas:
     
         return Endurance
     
+    ###
+    
+    def liftCalc(rho, v, sWing, CL):
+        
+        lift = .5 * rho * (v**2) * sWing * CL
+        
+        return lift
+    
+    ###
+    
+    def dragCalc(rho, v, sWing, cD0, K, CL):
+        
+        drag = 0.5 * rho * (v**2) * sWing * (cD0 + (K*(CL**2)))
+        
+        return drag
+    
+
+    
+    
 

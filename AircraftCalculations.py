@@ -14,7 +14,7 @@ v = 89.408 # Cruising velocity in m/s
 
 Wp = 1000 * 8.8707 * 9.81 / 2.205  # Payload weight in kg (capacity * component weight * conversion)
 We = 7000 * 9.81 / 2.205 # Empty weight in kg 
-Wf = 6.8 * 450 * 9.81  / 2.205 # Fuel weight in kg (capacity * component weight * conversion)
+Wf = 6.8 * 480.45 * 9.81  / 2.205 # Fuel weight in kg (capacity * component weight * conversion)
 W0 = Wp + We + Wf # Total weight in kg
 fracWp = Wp/W0
 fracWe = We/W0
@@ -185,7 +185,7 @@ vStall = math.sqrt((2 * W0) / (rho * sWing * CL))
 
 W1 = We + Wp
 SFC = 0.54 # lb/hp*hr
-C = (SFC * 608.22739 * 9.81) / (1000 * 1000 * 3600) 
+C = (SFC * 608.22739 * 9.81*2) / (1000 * 1000 * 3600) 
 nPR = 0.9
 CLCDmax = AircraftFormulas.CLCDmax(K, cD0total, 1)
 
@@ -218,3 +218,96 @@ print("(CL(3/2)/CD)max: "f"{CL32CDmax:.3}")
 print("Velocity to Achieve Max Endurance with Fuel: "f"{vEFull:.4}"" [m/2]")
 print("Velocity to Achieve Max Endurance with No Fuel: "f"{vEEmpty:.4}"" [m/s]")
 print("Maximum Endurance: "f"{maxEnduranceHR:.3}"" [hr]")
+
+################
+# Begin Part F Calculations #
+# Pull-Up Maneuver Calculations
+g = 9.81 
+nPosStruc = 3.8
+nPosAero = (.5 * rho * (v**2) * sWing * CL) / W0
+print("Structural Limit: "f"{nPosStruc:.2}")
+print("Aerodynamic Limit: "f"{nPosAero:.3}")
+
+rPullUpS = (v**2) / (g * (nPosStruc - 1))
+rPullUpA = (v**2) / (g * (nPosAero - 1))
+print("Structurally Limited Pull Up Radius: "f"{rPullUpS:.5}"" [m]")
+print("Aerodynamically Limited Pull Up Radius: "f"{rPullUpA:.5}"" [m]")
+
+pullUpRate = (g * (nPosAero - 1)) / v
+print("Aerodynamically Limited Pull Up Rate: "f"{pullUpRate:.2}"" [radians/s]")
+
+################
+# Level Turn Maneuver Calculations
+rTurnS = (v**2) / (g * math.sqrt((nPosStruc)**2 - 1))
+rTurnA = (v**2) / (g * math.sqrt((nPosAero)**2 - 1))
+print("Structurally Limited Level Turn Radius: "f"{rTurnS:.5}"" [m]")
+print("Aerodynamically Limited Level Turn Radius: "f"{rTurnA:.5}"" [m]")
+
+levelTurnRate = (g * math.sqrt((nPosAero**2)-1) / (v))
+print("Aerodynamically Limited Level Turn Rate: "f"{levelTurnRate:.2}"" [radians/s]")
+
+################
+# Maneuvering Velocity Calculation
+vA = math.sqrt( (2*nPosStruc*W0) / (rho*CL*sWing))
+print("Maneuvering Velocity: "f"{vA:.5}"" [m/s]")
+
+################
+# Takeoff Calculation
+totalP = 932000*2
+pASL = totalP * nPR
+muR = 0.03
+rhoT = 1.0984
+vLO = 1.2*vStall
+aRolling = 6
+aClimb = 3
+nTakeoff = 1.15
+CLrolling = W0 / (.5 * rhoT * (vLO**2) * sWing)
+# CLrolling = a3D*(aRolling - aL0)
+# print(CLrolling)
+liftT = AircraftFormulas.liftCalc(rhoT, 0.7*vLO, sWing, CLrolling)
+dragT = AircraftFormulas.dragCalc(rhoT, 0.7*vLO, sWing, cD0total, K, CLrolling)
+pAT = pASL * (rhoT/1.225)
+thrustT = pAT / (0.7*vLO)
+
+takeoffGroundRoll = (1.44 * (W0**2)) / (g * rhoT * sWing * CL * (thrustT - dragT - (muR * (W0 - liftT))))
+print("Takeoff Ground Roll Distance: "f"{takeoffGroundRoll:.5}"" [m]")
+
+rTakeoff = (vLO**2) / (g * (nTakeoff - 1))
+takeoffTransition = rTakeoff * math.sin((math.pi*aClimb)/180)
+print("Takeoff Transition Distance: "f"{takeoffTransition:.5}"" [m]")
+
+hATakeoff = (35/3.281) - rTakeoff + (rTakeoff * math.cos((math.pi*aClimb)/180))
+takeoffAir = hATakeoff / (math.tan((math.pi*aClimb)/180))
+print("Takeoff Air Distance: "f"{takeoffAir:.5}"" [m]")
+
+totalTakeoff = takeoffGroundRoll + takeoffTransition + takeoffAir
+print("Total Takeoff Distance: "f"{totalTakeoff:.5}"" [m]")
+
+################
+# Landing Calculation
+vTD = 1.3*vStall
+vFlare = vTD
+thetaFlare = 3
+thetaApproach = thetaFlare
+muB = 0.5
+nLanding = 1.12 # From difference of 0.03 in HW9
+
+rLanding = (vFlare**2) / (g * (nLanding - 1))
+hALanding = (50/3.281) - rLanding + (rLanding * (math.cos(math.pi*thetaApproach/180)))
+landingAir = hALanding / math.tan(math.pi*thetaFlare/180)
+print("Landing Air Distance: "f"{landingAir:.5}"" [m]")
+
+landingFlare = rLanding * math.sin(math.pi*thetaFlare/180)
+print("Landing Flare Distance: "f"{landingFlare:.5}"" [m]")
+
+liftL = AircraftFormulas.liftCalc(rhoT, 0.7*vTD, sWing, CLrolling)
+dragL = AircraftFormulas.dragCalc(rhoT, 0.7*vTD, sWing, cD0total, K, CLrolling)
+landingGroundRoll = (1.69 * (We**2)) / (g * rhoT * sWing * CL * (dragL + (muB * (We - liftL))))
+print("Landing Ground Roll Distance: "f"{landingGroundRoll:.5}"" [m]")
+
+totalLanding = landingAir + landingFlare + landingGroundRoll
+print("Total Landing Distance: "f"{totalLanding:.5}"" [m]")
+
+
+
+
