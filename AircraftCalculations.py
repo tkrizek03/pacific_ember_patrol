@@ -249,7 +249,7 @@ print("Aerodynamically Limited Level Turn Rate: "f"{levelTurnRate:.2}"" [radians
 ################
 # Maneuvering Velocity Calculation
 vA = math.sqrt( (2*nPosStruc*W0) / (rho*CL*sWing))
-print("Maneuvering Velocity: "f"{vA:.5}"" [m/s]")
+print("Maximum Velocity for Maneuvering: "f"{vA:.5}"" [m/s]")
 
 ################
 # Takeoff Calculation
@@ -258,26 +258,29 @@ pASL = totalP * nPR
 muR = 0.03
 rhoT = 1.0984
 vLO = 1.2*vStall
-aRolling = 6
+aRolling = 3
 aClimb = 3
 nTakeoff = 1.15
-CLrolling = W0 / (.5 * rhoT * (vLO**2) * sWing)
-# CLrolling = a3D*(aRolling - aL0)
-# print(CLrolling)
+CLrolling = a3D*(aRolling - aL0)
 liftT = AircraftFormulas.liftCalc(rhoT, 0.7*vLO, sWing, CLrolling)
 dragT = AircraftFormulas.dragCalc(rhoT, 0.7*vLO, sWing, cD0total, K, CLrolling)
 pAT = pASL * (rhoT/1.225)
 thrustT = pAT / (0.7*vLO)
+print("Coefficient of Lift while Rolling: "f"{CLrolling:.3}")
 
 takeoffGroundRoll = (1.44 * (W0**2)) / (g * rhoT * sWing * CL * (thrustT - dragT - (muR * (W0 - liftT))))
+print("Lift Generated During Takeoff Ground Roll: "f"{liftT:.6}"" [N]")
+print("Drag Generated During Takeoff Ground Roll: "f"{dragT:.5}"" [N]")
 print("Takeoff Ground Roll Distance: "f"{takeoffGroundRoll:.5}"" [m]")
 
 rTakeoff = (vLO**2) / (g * (nTakeoff - 1))
 takeoffTransition = rTakeoff * math.sin((math.pi*aClimb)/180)
+print("Takeoff Maneuver Radius: "f"{rTakeoff:.5}"" [m]")
 print("Takeoff Transition Distance: "f"{takeoffTransition:.5}"" [m]")
 
 hATakeoff = (35/3.281) - rTakeoff + (rTakeoff * math.cos((math.pi*aClimb)/180))
 takeoffAir = hATakeoff / (math.tan((math.pi*aClimb)/180))
+
 print("Takeoff Air Distance: "f"{takeoffAir:.5}"" [m]")
 
 totalTakeoff = takeoffGroundRoll + takeoffTransition + takeoffAir
@@ -295,6 +298,7 @@ nLanding = 1.12 # From difference of 0.03 in HW9
 rLanding = (vFlare**2) / (g * (nLanding - 1))
 hALanding = (50/3.281) - rLanding + (rLanding * (math.cos(math.pi*thetaApproach/180)))
 landingAir = hALanding / math.tan(math.pi*thetaFlare/180)
+print("Landing Maneuver Radius: "f"{rLanding:.5}"" [m]")
 print("Landing Air Distance: "f"{landingAir:.5}"" [m]")
 
 landingFlare = rLanding * math.sin(math.pi*thetaFlare/180)
@@ -302,7 +306,9 @@ print("Landing Flare Distance: "f"{landingFlare:.5}"" [m]")
 
 liftL = AircraftFormulas.liftCalc(rhoT, 0.7*vTD, sWing, CLrolling)
 dragL = AircraftFormulas.dragCalc(rhoT, 0.7*vTD, sWing, cD0total, K, CLrolling)
-landingGroundRoll = (1.69 * (We**2)) / (g * rhoT * sWing * CL * (dragL + (muB * (We - liftL))))
+landingGroundRoll = (1.69 * (W1**2)) / (g * rhoT * sWing * CL * (dragL + (muB * (W1 - liftL))))
+print("Lift Generated During Landing Ground Roll: "f"{liftL:.6}"" [N]")
+print("Drag Generated During Landing Ground Roll: "f"{dragL:.5}"" [N]")
 print("Landing Ground Roll Distance: "f"{landingGroundRoll:.5}"" [m]")
 
 totalLanding = landingAir + landingFlare + landingGroundRoll
