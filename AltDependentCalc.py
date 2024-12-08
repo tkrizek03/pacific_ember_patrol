@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import StandAtmFunc
 
+
 W0 = 85143.5 # N
 sWing = 44.3 # m**2
 CLmax = 1.383 
@@ -84,7 +85,8 @@ for i in range(25001):
     # Determines R/C max for each loop iteration, appends to list
     RCMax = pEOptimal / W0
     RCMaxList.append(RCMax)
-    
+
+
 plt.figure(figsize=(6,6))
 plt.title('Power Relationships at Altitude')
 plt.ylabel('Power [W]')
@@ -97,6 +99,8 @@ plt.ylim([0, 1500000])
 plt.ticklabel_format(useOffset=False, style='plain')
 plt.legend()
 plt.show()
+
+
 
 plt.figure(figsize=(6,6))
 plt.title('R/C vs. Altitude')
@@ -135,4 +139,10 @@ plt.ylim([0, 20])
 plt.legend()
 plt.show()
 
-rhoFinder = densityList[1123]
+
+
+
+
+
+
+
